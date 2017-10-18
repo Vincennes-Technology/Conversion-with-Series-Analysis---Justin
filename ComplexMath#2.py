@@ -56,29 +56,50 @@ def polar_to_rect(polar_num):
 
 # Magnitude function for later use. Takes a real + j number and returns the magnitude
 def magnitude(number):
-    absolute = math.sqrt((number[0] * number[0]) + (number[1]* number[1]))
+    absolute = math.sqrt((number[0] * number[0]) + (number[1] * number[1]))
     return absolute
 
 # Getting the basic information from the user.
 
-# coordinate_system = raw_input('Greetings User! Shall you be working in rectangular or polar format today?:\n')
 print('For this particular experiment, I (the pi) am only capable of series AC calculations with one R, L & C.\n')
 frequency = input('\nWhat is the frequency of the source? (in Hz): ')
 voltage = input('\nWhat is the voltage of the source? (in RMS): ')
 resistor_value = input('\nWhat value of resistor is present? (in Ohms): ')
 inductor_value = input('\nWhat is the value of your inductor? (in Henrys): ')
+inductor_resistance = input('\nWhat is the resistance of the wiring of the inductor? (in Ohms): ')
 capacitor_value = input('\nWhat is the value of your capacitor? (in Farads): ')
 
 # Some basic calculations
 omega = 2 * pi * frequency
+total_resistance = inductor_resistance + resistor_value
 inductance = omega * inductor_value
+mag_inductance = (inductor_resistance, inductance)
+mag_inductance = magnitude(mag_inductance)
 capacitance = (1/(omega * capacitor_value))
-impedance = resistor_value, (inductance + -capacitance)
+impedance = total_resistance, (inductance + -capacitance)
 mag_impedance = magnitude(impedance)
 current = float(voltage) / float(mag_impedance)
 v_r = current * resistor_value
 v_l = current * inductance
 v_c = current * capacitance
+
+# Phase angle calculations (tests for positive/negative phase
+if inductance > capacitance:
+    argument_send = impedance[1] / impedance[0]
+else:
+    if capacitance > inductance:
+        argument_send = impedance[0] / impedance[1]
+    else:
+        argument_send = 0
+
+phase_radians = math.atan(argument_send)
+phase_angle = phase_radians * 180/pi
+
+# Printing out the results
+if capacitance > inductance:
+    print('Your current will lead your voltage by %f degrees ' % phase_angle)
+if inductance > capacitance:
+    print('Your current will lag your voltage by %f degrees' % phase_angle)
 print('\nYour total impedance is: %.2f + %.2fj' % (impedance[0], impedance[1]))
 print('That means the magnitude of your impedance is: %.2f' % mag_impedance)
 print('Which then means your current is: %f A' % current)

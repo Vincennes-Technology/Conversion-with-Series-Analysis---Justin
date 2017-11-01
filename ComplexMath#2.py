@@ -7,19 +7,16 @@ pi = 3.1415926535897932384626433832
 
 # Expects complex numbers in (magnitude, phase) polar format. Returns the sum.
 
-def complex_add(complex_a, complex_b):
-    real_answer = complex_a[0] + complex_b[0]
-    imag_answer = complex_a[1] + complex_b[1]
-    return real_answer, imag_answer
+def complex_add(complex_a,complex_b):
 
-
-# Expects complex numbers in (magnitude, phase) polar format. Returns the difference of B from A
-
-def complex_subtract(complex_a, complex_b):
-    real_answer = complex_a[0] - complex_b[0]
-    imag_answer = complex_a[1] - complex_b[1]
-    return real_answer, imag_answer
-
+    x1 = float(complex_a[0]) * math.cos(pi/180 * complex_a[1])
+    x2 = float(complex_b[0]) * math.cos(pi/180 * complex_b[1])
+    y1 = float(complex_a[0]) * math.sin(pi/180 * complex_a[1])
+    y2 = float(complex_b[0]) * math.sin(pi/180 * complex_b[1])
+    x_total = x1 + x2
+    y_total = y1 + y2
+    answer = rect_to_polar(x_total, y_total)
+    return answer[0], answer[1]
 
 # Expects complex numbers in (magnitude, phase) polar format. Returns the quotient of B from A
 
@@ -122,21 +119,53 @@ if (mode_select == 'Parallel') or (mode_select == 'parallel'):
     inductor_resistance = input('\nWhat is the resistance of the wiring of the inductor? (in Ohms): ')
     capacitor_value = input('\nWhat is the value of your capacitor? (in Farads): ')
 
-# Some basic calculations. Polar format is utilized!
+# Some basic calculations. Polar format is utilized! r, Theta
+    polar_voltage = voltage, 0
     omega = 2 * pi * frequency
-    inductance = inductor_resistance, omega * inductor_value
-    capacitance = 0, 1 / (omega * capacitor_value)
-    polar_capacitance = rect_to_polar(capacitance[0], -capacitance[1])
-    polar_inductance = rect_to_polar(inductance[0], inductance[1])
-    resistance = resistor_value, 0
+    resistor_value = float(resistor_value)
+    resistance = float(resistor_value), 0
+    inductor_resistance = inductor_resistance, 0
+    inductance = (omega * inductor_value), 90
+    capacitance = 1/(omega*capacitor_value), -90
+    inductor_branch = complex_add(inductor_resistance, inductance)
     one = 1, 0
-    inverse_p_capacitance = complex_division(one, polar_capacitance)
-    inverse_p_inductance = complex_division(one, polar_inductance)
-    inverse_p_resistance = complex_division(one, resistance)
+
+# Getting the inverse of the impedances for later addition together
+    inverse_resistance = complex_division(one, resistance)
+    inverse_p_capacitance = complex_division(one, capacitance)
+    inverse_p_inductance = complex_division(one, inductor_branch)
+
+# Breaking the summation of the denominator in to multiple variables for total impedance calculations
+# Utilizes the formula 1 / ((1/Xl) + (1/R) + (1/Xc))
     denominator = complex_add(inverse_p_capacitance, inverse_p_inductance)
-    denominator_f = complex_add(denominator, inverse_p_resistance)
+    denominator_f = complex_add(denominator, inverse_resistance)
     total_impedance = complex_division(one, denominator_f)
-    
+
+# Current calculations. Utilizes current divider equation for impedances in parallel
+    total_current = voltage / total_impedance[0]
+    inductor_branch_current = total_current * (total_impedance[0] / inductor_branch[0])
+    cap_branch_current = total_current * (total_impedance[0] / capacitance[0])
+    resistor_branch_current = total_current * (total_impedance[0] / resistance[0])
+
+# Printing out the results for the user!
+    print('The magnitude of your impedance is %f with a phase of % degrees' % (total_impedance[0], total_impedance[1]))
+    if total_impedance[1] > 0:
+        print('Your current will lag your voltage by %f degrees' % total_impedance[1])
+    if total_impedance[1] < 0:
+        print('Your current will lead your voltage by %f degrees' % total_impedance[1])
+    if total_impedance[1] == 0:
+        print('Mate, somehow your voltage and current will be in phase!')
+    print('Your total current will be %f A' % total_current)
+    print('Your inductor branch current will be %f A' % inductor_branch_current)
+    print('Your capacitor branch current will be %f A' % cap_branch_current)
+    print('Your resistor branch current will be %f A' % resistor_branch_current)
+
+
+
+
+
+
+
 
 
 

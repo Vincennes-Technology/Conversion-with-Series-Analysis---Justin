@@ -105,7 +105,7 @@ if (mode_select == 'Series') or (mode_select == 'series'):
         print('Your current will lag your voltage by %f degrees' % phase_angle)
     print('\nYour total impedance is: %.2f + %.2fj' % (impedance[0], impedance[1]))
     print('That means the magnitude of your impedance is: %.2f' % mag_impedance)
-    print('Which then means your current is: %e A' % current)
+    print('Which then means your current is: %f A' % current)
     print('V(R) = %.2f, V(L) = %.2f, V(C) = %.2f' % (v_r, v_l, v_c))
 
 # Parallel branch.

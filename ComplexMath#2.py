@@ -156,9 +156,6 @@ if (mode_select == 'Parallel') or (mode_select == 'parallel'):
     if total_impedance[1] == 0:
         print('Mate, somehow your voltage and current will be in phase!')
     print('Your total current will be %f A' % total_current)
-    print('Your inductor branch current will be %f A' % inductor_branch_current)
-    print('Your capacitor branch current will be %f A' % cap_branch_current)
-    print('Your resistor branch current will be %f A' % resistor_branch_current)
 
 
 

@@ -1,8 +1,11 @@
 #!/usr/bin/python
 # Justin Limbach
 # Complex Calculator Rev 2 10/9/2017
-# Rev 2 adds polar to rect conversions and vice versa. Also adds some basic series circuit calculations.
+# Final Revision.
 import math
+import Adafruit_CharLCD as LCD
+lcd = LCD.Adafruit_CharLCDPlate()
+
 pi = 3.1415926535897932384626433832
 
 # Expects complex numbers in (magnitude, phase) polar format. Returns the sum.
@@ -148,7 +151,7 @@ if (mode_select == 'Parallel') or (mode_select == 'parallel'):
     resistor_branch_current = total_current * (total_impedance[0] / resistance[0])
 
 # Printing out the results for the user!
-    print('The magnitude of your impedance is %f with a phase of % degrees' % (total_impedance[0], total_impedance[1]))
+    print('The magnitude of your impedance is %f with a phase of %f degrees' % (total_impedance[0], total_impedance[1]))
     if total_impedance[1] > 0:
         print('Your current will lag your voltage by %f degrees' % total_impedance[1])
     if total_impedance[1] < 0:

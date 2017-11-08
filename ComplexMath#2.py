@@ -3,19 +3,25 @@
 # Complex Calculator Rev 2 10/9/2017
 # Final Revision.
 import math
-import Adafruit_CharLCD as LCD
-lcd = LCD.Adafruit_CharLCDPlate()
 
 pi = 3.1415926535897932384626433832
 
 # Expects complex numbers in (magnitude, phase) polar format. Returns the sum.
 
 def complex_add(complex_a,complex_b):
+    if complex_a[1] == 0:
+        x1 = complex_a[0]
+        y1 = 0
+    else:
+        x1 = float(complex_a[0]) * math.cos(pi/180 * complex_a[1])
+        y1 = float(complex_a[0]) * math.sin(pi/180 * complex_a[1])
+    if complex_b[1] == 0:
+        x2 = complex_b[0]
+        y2 = 0
+    else:
+        x2 = float(complex_b[0]) * math.cos(pi/180 * complex_b[1])
+        y2 = float(complex_b[0]) * math.sin(pi / 180 * complex_b[1])
 
-    x1 = float(complex_a[0]) * math.cos(pi/180 * complex_a[1])
-    x2 = float(complex_b[0]) * math.cos(pi/180 * complex_b[1])
-    y1 = float(complex_a[0]) * math.sin(pi/180 * complex_a[1])
-    y2 = float(complex_b[0]) * math.sin(pi/180 * complex_b[1])
     x_total = x1 + x2
     y_total = y1 + y2
     answer = rect_to_polar(x_total, y_total)
@@ -127,38 +133,37 @@ if (mode_select == 'Parallel') or (mode_select == 'parallel'):
     omega = 2 * pi * frequency
     resistor_value = float(resistor_value)
     resistance = float(resistor_value), 0
-    inductor_resistance = inductor_resistance, 0
+    inductor_resistance = float(inductor_resistance), 0
     inductance = (omega * inductor_value), 90
     capacitance = 1/(omega*capacitor_value), -90
     inductor_branch = complex_add(inductor_resistance, inductance)
-    one = 1, 0
+    one = (float(1), 0)
 
 # Getting the inverse of the impedances for later addition together
     inverse_resistance = complex_division(one, resistance)
     inverse_p_capacitance = complex_division(one, capacitance)
     inverse_p_inductance = complex_division(one, inductor_branch)
+    print'R-1 = %f %f, C-1 = %f, %f L-1 = %f, %f' % (inverse_resistance[0], inverse_resistance[1],
+                                                     inverse_p_capacitance[0], inverse_p_capacitance[1],
+                                                     inverse_p_inductance[0], inverse_p_inductance[1])
 
 # Breaking the summation of the denominator in to multiple variables for total impedance calculations
 # Utilizes the formula 1 / ((1/Xl) + (1/R) + (1/Xc))
     denominator = complex_add(inverse_p_capacitance, inverse_p_inductance)
-    denominator_f = complex_add(denominator, inverse_resistance)
+    print 'L-1 + C-1 = %f, %f' % (denominator[0], denominator[1])
+    denominator_f = complex_add(inverse_resistance, denominator)
+    print ' L-1 + C-1 + R-1 = %f, %f' % (denominator_f[0], denominator_f[1])
     total_impedance = complex_division(one, denominator_f)
 
 # Current calculations. Utilizes current divider equation for impedances in parallel
-    total_current = voltage / total_impedance[0]
-    inductor_branch_current = total_current * (total_impedance[0] / inductor_branch[0])
-    cap_branch_current = total_current * (total_impedance[0] / capacitance[0])
-    resistor_branch_current = total_current * (total_impedance[0] / resistance[0])
+    total_current = complex_division(polar_voltage, total_impedance)
+#   inductor_branch_current = total_current * (total_impedance[0] / inductor_branch[0])
+#    cap_branch_current = total_current * (total_impedance[0] / capacitance[0])
+#   resistor_branch_current = total_current * (total_impedance[0] / resistance[0])
 
+    print 'Your total current is %f with a %f phase shift' % total_current
 # Printing out the results for the user!
-    print('The magnitude of your impedance is %f with a phase of %f degrees' % (total_impedance[0], total_impedance[1]))
-    if total_impedance[1] > 0:
-        print('Your current will lag your voltage by %f degrees' % total_impedance[1])
-    if total_impedance[1] < 0:
-        print('Your current will lead your voltage by %f degrees' % total_impedance[1])
-    if total_impedance[1] == 0:
-        print('Mate, somehow your voltage and current will be in phase!')
-    print('Your total current will be %f A' % total_current)
+    print('The magnitude of your impedance is %f' % total_impedance[0])
 
 
 
